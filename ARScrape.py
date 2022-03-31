@@ -1,3 +1,4 @@
+from dis import Instruction
 from ARScript import Scraper
 from selenium.webdriver.common.keys import Keys
 from ScrapeTools import xpathCheck, classCheck
@@ -93,7 +94,7 @@ def loginAR():
   print("Logging in")
   client.init_driver()
   try:
-    client.driver.get("https://www.allrecipes.com/recipes/200/meat-and-poultry/beef/")
+    #client.driver.get("https://www.allrecipes.com/")
     sleep(2)
     # emailBar = "/html/body/div/main/section/div/form/div[1]/input"
     # emailEle = xpathCheck(emailBar,client.driver)
@@ -156,5 +157,92 @@ def parseRecipies():
   return listOfLinks
 listOfLinks = parseRecipies()
 
+
+
+
+
+def getListInstructions(src):
+  soup = BeautifulSoup(src,"html.parser")
+  lis = soup.find_all("li",{"class":"instructions-section-item"})
+  print(len(lis))
+  listOfIng = []
+  for li in lis:
+    print(li.text.strip())
+    listOfIng.append(li.text.strip())
+  return listOfIng
+def getListIngredients(src):
+  soup = BeautifulSoup(src,"html.parser")
+  lis = soup.find_all("span",{"class":"ingredients-item-name"})
+  print(len(lis))
+  listOfIng = []
+  for li in lis:
+    print(li.text.strip())
+    listOfIng.append(li.text.strip())
+  return listOfIng
+
+
+def scrapeSingleRecipie(link):
+  
+  print("scraping sku")
+  data =  {"link":link}
+  sleep(1)
+  try:
+    print("hi")
+    client.driver.get(link)
+    print("huh")
+    sleep(5)                 
+    try:
+      title = "/html/body/div[3]/div/main/div[1]/div[2]/div[1]/div[1]/div[1]/div/h1"
+      titleEle = xpathCheck(title,client.driver)
+      data["title"] = titleEle.text    
+    except:
+      data["title"] = "not found"
+    try:
+      #ingredients = "/html/body/div[3]/div/main/div[1]/div[2]/div[1]/div[2]/div[2]/div[5]/section[1]/fieldset/ul"
+      #ingredientsEle = xpathCheck(title,client.driver)
+      sleep(1)
+      listIngredients = getListIngredients(client.driver.page_source)
+      data["ingredients"] = '~'.join(listIngredients).replace("Advertisement","")
+    except:
+      data["ingredients"] = "not found"
+    try:
+      #instruction = "/html/body/div[3]/div/main/div[1]/div[2]/div[1]/div[2]/div[2]/section[1]/fieldset/ul"
+      #instructionEle = xpathCheck(title,client.driver)
+      #src = instructionEle.get_attribute("innerHTML")
+      sleep(1)
+      instructionList = getListInstructions(client.driver.page_source)
+      data["instructions"] = '~'.join(instructionList).replace("Advertisement","")
+    except:
+      data["instructions"] = "not found"
+
+    return data
+  except Exception as e:
+    print(repr(e))
+    #loginAR()
+
+
+
+
 def scrapeRecipies(listOfLinks):
-  pass
+  #loginAR()
+  save_df = pd.DataFrame()
+  # loadSkus = open("DCUSAProductCodes.txt", "r", encoding="utf8")
+  # listOfSkus = loadSkus.readlines()
+      # if sku+".html" in os.listdir("Products/"): 
+      #   print("skip")
+      #   continue
+  count = 0
+  save = 0
+  print(f"{len(listOfLinks)=}")
+  for link in listOfLinks:
+    
+    try:  
+      data = scrapeSingleRecipie(link)
+      print(f"{data=}")
+      save_df = save_df.append(data,ignore_index=True)
+      count = count + 1   
+      save_df.to_csv('Recipies.csv', index = False)
+      
+    except Exception as e:
+      print(repr(e))
+scrapeRecipies(listOfLinks)

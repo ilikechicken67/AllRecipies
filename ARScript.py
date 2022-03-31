@@ -39,7 +39,7 @@ class Scraper():
         self.loop = True
         #self.all_categories = get_main_nav_categories()    
         self.subCategories = []     
-        #self.init_driver()
+        self.init_driver()
         print("Scraper initialized ")
     def init_driver(self):
         try:
@@ -58,8 +58,8 @@ class Scraper():
         chrome_options.add_argument("window-size=1920,1080")
         chrome_options.add_argument('log-level=3')
         #chrome_options.add_argument("--no-sandbox") # linux only
-        # chrome_options.add_argument("--headless") ERR_TOO_MANY_REDIRECTS
-        #chrome_options.headless = True # also works
+        #chrome_options.add_argument("--headless") #ERR_TOO_MANY_REDIRECTS
+        chrome_options.headless = True # also works
         self.driver = webdriver.Chrome(options=chrome_options)
         #driver = webdriver.Firefox()
         self.driver.delete_all_cookies()
