@@ -190,7 +190,8 @@ def scrapeSingleRecipie(link):
     print("hi")
     client.driver.get(link)
     print("huh")
-    sleep(5)                 
+    sleep(1)
+    src = client.driver.page_source                 
     try:
       title = "/html/body/div[3]/div/main/div[1]/div[2]/div[1]/div[1]/div[1]/div/h1"
       titleEle = xpathCheck(title,client.driver)
@@ -200,8 +201,7 @@ def scrapeSingleRecipie(link):
     try:
       #ingredients = "/html/body/div[3]/div/main/div[1]/div[2]/div[1]/div[2]/div[2]/div[5]/section[1]/fieldset/ul"
       #ingredientsEle = xpathCheck(title,client.driver)
-      sleep(1)
-      listIngredients = getListIngredients(client.driver.page_source)
+      listIngredients = getListIngredients(src)
       data["ingredients"] = '~'.join(listIngredients).replace("Advertisement","")
     except:
       data["ingredients"] = "not found"
@@ -209,8 +209,7 @@ def scrapeSingleRecipie(link):
       #instruction = "/html/body/div[3]/div/main/div[1]/div[2]/div[1]/div[2]/div[2]/section[1]/fieldset/ul"
       #instructionEle = xpathCheck(title,client.driver)
       #src = instructionEle.get_attribute("innerHTML")
-      sleep(1)
-      instructionList = getListInstructions(client.driver.page_source)
+      instructionList = getListInstructions(src)
       data["instructions"] = '~'.join(instructionList).replace("Advertisement","")
     except:
       data["instructions"] = "not found"
@@ -218,7 +217,7 @@ def scrapeSingleRecipie(link):
     return data
   except Exception as e:
     print(repr(e))
-    #loginAR()
+    client.init_driver()
 
 
 
